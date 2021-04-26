@@ -14,6 +14,7 @@ Particle::Particle() {
 	setCoordX((double)rand()/RAND_MAX);
 	setCoordY((double)rand()/RAND_MAX);
 
+
 	double f = (double)rand() / RAND_MAX;
 	m_mass = 1 + f * (maxMass - 1);
 

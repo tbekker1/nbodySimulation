@@ -23,13 +23,23 @@ void displayAllParticleInfo(Particle particles[], int numParticles){
 
 int main(int argc, char * argv[]){
 
-	if (argc != 3){
+	if (argc != 3 && argc != 4){
 		cout << "Not right amount of arguments" << endl;
 		return -1;
 	}
 
 	int numParticles = atoi(argv[1]);
 	int numberOfTimesteps = atoi(argv[2]);
+
+	//omp_set_num_threads(1);
+	omp_set_num_threads(2);
+	//omp_set_num_threads(3);
+	//omp_set_num_threads(numParticles);
+
+	int debugFlag = 0;
+	if (argc == 4){
+		debugFlag = 1;
+	}
 
 	srand(time(NULL));
 
@@ -41,14 +51,27 @@ int main(int argc, char * argv[]){
 
 	double deltaT = unitTime;
 
-	for (int i = 0; i < numberOfTimesteps; i++){
+	double begin;
+	double end;
+
+	begin = omp_get_wtime();
+
+	for (int timestep = 0; timestep < numberOfTimesteps; timestep++){
 		//if output print output data
+
+
+		if (debugFlag == 1){
+			cout << endl;
+			cout << "Timestep " << timestep << endl;
+			displayAllParticleInfo(particles, numParticles);
+		}
 
 		for (int i = 0; i < numParticles; i++){
 			particles[i].setForceX(0);
 			particles[i].setForceY(0);
 		}
 
+#pragma omp parallel for schedule(static)
 		for (int i = 0; i < numParticles; i++){
 			for (int j = 0; j < numParticles; j++){
 				if (i != j){
@@ -69,16 +92,26 @@ int main(int argc, char * argv[]){
 
 		}
 
+#pragma omp parallel for schedule(static)
 		for (int i = 0; i < numParticles; i++){
 			particles[i].setCoordX(particles[i].getCoordX() + deltaT * particles[i].getVelocityX());
 			particles[i].setCoordY(particles[i].getCoordY() + deltaT * particles[i].getVelocityY());
-			particles[i].setVelocityX(particles[i].getVelocityX() + deltaT / particles[i].getMass() + particles[i].getForceX());
-			particles[i].setVelocityY(particles[i].getVelocityY() + deltaT / particles[i].getMass() + particles[i].getForceY());
+			particles[i].setVelocityX(particles[i].getVelocityX() + deltaT / particles[i].getMass() * particles[i].getForceX());
+			particles[i].setVelocityY(particles[i].getVelocityY() + deltaT / particles[i].getMass() * particles[i].getForceY());
 		}
 
 	}
 
+	end = omp_get_wtime();
+
+	double time = end - begin;
+
+	cout << endl;
+
+
 	displayAllParticleInfo(particles, numParticles);
+
+	cout << "Runtime taken: " << time << " seconds" << endl;
 
 	return 0;
 }
