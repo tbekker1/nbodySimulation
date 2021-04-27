@@ -23,21 +23,19 @@ void displayAllParticleInfo(Particle particles[], int numParticles){
 
 int main(int argc, char * argv[]){
 
-	if (argc != 3 && argc != 4){
+	if (argc != 4 && argc != 5){
 		cout << "Not right amount of arguments" << endl;
 		return -1;
 	}
 
 	int numParticles = atoi(argv[1]);
 	int numberOfTimesteps = atoi(argv[2]);
+	int numThreads = atoi(argv[3]);
 
-	//omp_set_num_threads(1);
-	omp_set_num_threads(2);
-	//omp_set_num_threads(3);
-	//omp_set_num_threads(numParticles);
+	omp_set_num_threads(numThreads);
 
 	int debugFlag = 0;
-	if (argc == 4){
+	if (argc == 5){
 		debugFlag = 1;
 	}
 
